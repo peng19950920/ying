@@ -1,0 +1,113 @@
+package mobilez.client.adapter;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeSet;
+
+import mobilez.R;
+import mobilez.model.CityModel;
+
+/**
+ * Created by 43997119 on 2016/9/29.
+ */
+
+public class CityListViewAdapter extends BaseAdapter {
+
+    private Context context;
+    private HashMap<String, Integer> selector;
+    private String[] letters = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+            "K", "L", "M", "N", "O", "P", "Q", "U", "V", "W", "X", "Y", "Z","#"};
+    private String[] cities;
+    private String[] nData;
+    private List<CityModel> alphabet = new ArrayList<>();
+    private List<CityModel> cityModelList = new ArrayList<>();
+
+    public CityListViewAdapter(Context context,String[] cities) {
+        this.context = context;
+        this.cities = cities;
+        sortIndex();
+        selector = new HashMap<String, Integer>();
+        for (int j = 0; j < letters.length; j++) {// 循环字母表，找出nData中对应字母的位置
+            for (int i = 0; i < nData.length; i++) {
+                if (nData[i].equals(letters[j].toLowerCase())) {
+                    selector.put(letters[j], i);
+                }
+            }
+        }
+    }
+
+    @Override
+    public int getCount() {
+        // TODO Auto-generated method stub
+        return nData.length;
+    }
+
+    @Override
+    public Object getItem(int position) {
+        // TODO Auto-generated method stub
+        return nData[position];
+    }
+
+    @Override
+    public long getItemId(int position) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        // TODO Auto-generated method stub
+        if (nData[position].length() == 1)// 如果是字母索引
+            return false;// 表示不能点击
+        return super.isEnabled(position);
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        String item = nData[position];
+        // TODO Auto-generated method stub
+
+        if (item.length() == 1){
+            convertView =  LayoutInflater.from(context).inflate(R.layout.city_index, null);
+            ((TextView) convertView.findViewById(R.id.text)).setText(item.toUpperCase());
+        }
+
+        else {
+            convertView = LayoutInflater.from(context).inflate(R.layout.city_item, null);
+            ((TextView) convertView.findViewById(R.id.text)).setText(item);
+        }
+
+        return convertView;
+    }
+
+    private void sortIndex() {
+        TreeSet<String> set = new TreeSet<String>();
+        // 获取初始化数据源中的首字母，添加到set中
+        for (String string : cities) {
+            set.add(String.valueOf(string.charAt(0)));
+        }
+        // 新数组的长度为原数据加上set的大小
+        nData = new String[cities.length + set.size()];
+        int i = 0;
+        for (String string : set) {
+            nData[i] = string;
+            i++;
+        }
+        // 将原数据拷贝到新数据中
+        System.arraycopy(cities, 0, nData, set.size(), cities.length);
+        Arrays.sort(nData, String.CASE_INSENSITIVE_ORDER);// 自动按照首字母排序
+    }
+
+    public  HashMap<String, Integer> getSelector(){
+        return selector;
+    }
+}

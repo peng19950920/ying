@@ -1,0 +1,163 @@
+package mobilez.client.fragment;
+
+import android.content.Context;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.TreeSet;
+
+import mobilez.R;
+import mobilez.client.Constants;
+import mobilez.client.adapter.CityListViewAdapter;
+import mobilez.manager.DeviceManager;
+import mobilez.model.CityModel;
+import mobilez.util.WidgetUtils;
+
+/**
+ * Created by 43997119 on 2016/9/29.
+ */
+public class CityListFragment extends BaseFragment implements View.OnClickListener{
+
+    LinearLayout layoutIndex;
+
+    private List<CityModel> alphabet = new ArrayList<>();
+
+    private String data[] = {"android", "java", "news", "baidu", "oberser",
+            "mary", "next", "ruby", "money", "lucy", "very", "thunder",
+            "object", "lily", "jay", "answer", "layout", "demos", "com",
+            "collect", "custom", "blog", "round", "redirect", "ground", "gray",
+            "blue", "zone", "james", "zhang", "location"};
+    private ListView listView;
+    private CityListViewAdapter adapter;
+    private TextView tv_show;// 中间显示标题的文本
+    private Button cancel;
+    private EditText search;
+    private TextView gpsLocation;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.z_fragment_city_list, container, false);
+        layoutIndex = (LinearLayout) view.findViewById(R.id.layout);
+        search = (EditText)view.findViewById(R.id.search);
+        gpsLocation = (TextView)view.findViewById(R.id.gpsLocation);
+        cancel = (Button)view.findViewById(R.id.cancel);
+        cancel.setOnClickListener(this);
+        layoutIndex.setBackgroundColor(Color.parseColor("#00ffffff"));
+        listView = (ListView)view. findViewById(R.id.city_list);
+
+        adapter = new CityListViewAdapter(getActivity(),data);
+        listView.setAdapter(adapter);
+
+        tv_show = (TextView) view.findViewById(R.id.tv);
+        tv_show.setVisibility(View.INVISIBLE);
+
+
+        getIndexView();
+
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+               // if( == setIndexTestColor(firstVisibleItem);
+
+            }
+        });
+        return view;
+
+    }
+
+    /** 绘制索引列表 */
+    public void getIndexView() {
+        final String[] str = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+                "K", "L", "M", "N", "O", "P", "Q", "U", "V", "W", "X", "Y", "Z" ,"#"};
+        final int height =
+                (WidgetUtils.getScreenHeight(getActivity())
+                        - WidgetUtils.getStatusBarHeight(getActivity())
+                        - DeviceManager.getInstance().dpToPixel(220))
+                        / str.length;
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, height);
+        for (int i = 0; i < str.length; i++) {
+            final TextView tv = new TextView(getActivity());
+            tv.setLayoutParams(params);
+            tv.setText(str[i]);
+            // tv.setTextSize(16);
+            tv.setPadding(10, 0, 10, 0);
+            layoutIndex.addView(tv);
+            layoutIndex.setOnTouchListener(new View.OnTouchListener() {
+
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    float y = event.getY();
+                    int index = (int) (y / height);
+                    if (index > -1 && index < str.length) {// 防止越界
+                        String key = str[index];
+                        if (adapter.getSelector().containsKey(key)) {
+                            int pos = adapter.getSelector().get(key);
+                            if (listView.getHeaderViewsCount() > 0) {
+                                listView.setSelectionFromTop( pos + listView.getHeaderViewsCount(), 0);
+                            } else {
+                                listView.setSelectionFromTop(pos, 0);
+                            }
+                            tv_show.setVisibility(View.VISIBLE);
+                            tv_show.setText(str[index]);
+                        }
+                    }
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            break;
+
+                        case MotionEvent.ACTION_MOVE:
+
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            tv_show.setVisibility(View.GONE);
+                            break;
+                    }
+                    return true;
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.cancel:
+                performActivityAction(Constants.REMOVE_CITY_LIST_FRAGMENT);
+        }
+    }
+    private void setIndexTestColor(int position){
+        if(adapter.getSelector().containsValue(position)){
+
+        }
+        for(int i = 0;i < 26;i++) {
+            if(position == i){
+                ((TextView) layoutIndex.getChildAt(i)).setTextColor(Color.parseColor("#DB0213"));
+            }
+            else ((TextView) layoutIndex.getChildAt(i)).setTextColor(Color.parseColor("#ff000000"));
+        }
+    }
+}
